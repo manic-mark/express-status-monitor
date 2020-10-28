@@ -12,8 +12,8 @@ try {
   console.warn('event-loop-stats not found, ignoring event loop metrics...');
 }
 
-module.exports = (io, span) => {
-  const defaultResponse = {
+function defaultResponse() {
+  return {
     2: 0,
     3: 0,
     4: 0,
@@ -22,7 +22,9 @@ module.exports = (io, span) => {
     mean: 0,
     timestamp: Date.now(),
   };
+};
 
+module.exports = (io, span) => {
   pidusage(process.pid, (err, stat) => {
     if (err) {
       debug(err);
@@ -42,8 +44,8 @@ module.exports = (io, span) => {
     }
 
     span.os.push(stat);
-    if (!span.responses[0] || (last.timestamp + span.interval) * 1000 < Date.now()) {
-      span.responses.push(defaultResponse);
+    if (!span.responses[0] || (last.timestamp + span.interval < Date.now()) {
+      span.responses.push(defaultResponse());
     }
 
     // todo: I think this check should be moved somewhere else
