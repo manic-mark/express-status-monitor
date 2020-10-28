@@ -44,7 +44,7 @@ module.exports = (io, span) => {
     }
 
     span.os.push(stat);
-    if (!span.responses[0] || (last.timestamp + span.interval < Date.now()) {
+    if (!span.responses[0] || (last.timestamp + span.interval) < Date.now()) {
       span.responses.push(defaultResponse());
     }
 
