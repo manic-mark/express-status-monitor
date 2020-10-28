@@ -16,6 +16,10 @@ module.exports = config => {
 
   config.title =
     typeof config.title === 'string' ? config.title : defaultConfig.title;
+  config.title =
+    typeof config.socketPath === 'string' ? config.socketPath : defaultConfig.socketPath;
+  config.title =
+    typeof config.chartjsSrc === 'string' ? config.chartjsSrc : defaultConfig.chartjsSrc;
   config.theme =
     typeof config.theme === 'string' ? config.theme : defaultConfig.theme;
   config.path =
