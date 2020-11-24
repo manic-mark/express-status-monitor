@@ -3,16 +3,9 @@ const os = require('os');
 const v8 = require('v8');
 const sendMetrics = require('./send-metrics');
 const debug = require('debug')('express-status-monitor');
+const { performance } = require('perf_hooks');
 
-let eventLoopStats; // eslint-disable-line
-
-try {
-  eventLoopStats = require('event-loop-stats'); // eslint-disable-line
-} catch (error) {
-  console.warn('event-loop-stats not found, ignoring event loop metrics...');
-}
-
-function defaultResponse() {
+function defaultResponse () {
   return {
     2: 0,
     3: 0,
@@ -22,7 +15,9 @@ function defaultResponse() {
     mean: 0,
     timestamp: Date.now(),
   };
-};
+}
+
+let lastEventLoopUtilization = performance.eventLoopUtilization();
 
 module.exports = (io, span) => {
   pidusage(process.pid, (err, stat) => {
@@ -39,8 +34,9 @@ module.exports = (io, span) => {
     stat.timestamp = Date.now();
     stat.heap = v8.getHeapStatistics();
 
-    if (eventLoopStats) {
-      stat.loop = eventLoopStats.sense();
+    lastEventLoopUtilization = performance.eventLoopUtilization(lastEventLoopUtilization);
+    stat.loop = {
+      utilization: lastEventLoopUtilization.utilization * 100
     }
 
     span.os.push(stat);

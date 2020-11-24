@@ -190,7 +190,7 @@ socket.on('esm_start', function (data) {
 
   eventLoopChart.data.datasets[0].data = data[defaultSpan].os.map(function (point) {
     if (point.loop) {
-      return point.loop.sum;
+      return point.loop.utilization;
     }
     return 0;
   });
@@ -293,8 +293,8 @@ socket.on('esm_stats', function (data) {
 
     eventLoopStat.textContent = '0';
     if (os && os.loop) {
-      eventLoopStat.textContent = os.loop.sum.toFixed(2) + 'ms';
-      eventLoopChart.data.datasets[0].data.push(os.loop.sum);
+      eventLoopStat.textContent = os.loop.utilization.toFixed(1) + '%';
+      eventLoopChart.data.datasets[0].data.push(os.loop.utilization);
       eventLoopChart.data.labels.push(os.timestamp);
     }
 
