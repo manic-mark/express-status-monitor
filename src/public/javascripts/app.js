@@ -242,7 +242,18 @@ socket.on('esm_start', function (data) {
       });
 
       var spanNode = document.createElement('span');
-      var textNode = document.createTextNode((span.retention * span.interval) / 60 + 'M'); // eslint-disable-line
+
+      const seconds = span.retention * span.interval;
+      const minutes = seconds / 60;
+      const hours = minutes / 60;
+      const days = hours / 24;
+
+      // eslint-disable-next-line no-nested-ternary
+      var textNode = hours < 1
+        ? document.createTextNode(minutes + 'M')
+        : days < 1
+          ? document.createTextNode(hours + 'H')
+          : document.createTextNode(days + 'D');
 
       spanNode.appendChild(textNode);
       spanNode.setAttribute('id', index);
@@ -254,7 +265,7 @@ socket.on('esm_start', function (data) {
 });
 
 socket.on('esm_stats', function (data) {
-  console.log(data);
+  // console.log(data);
 
   if (
     data.retention === spans[defaultSpan].retention &&
@@ -272,7 +283,7 @@ socket.on('esm_stats', function (data) {
 
     memStat.textContent = '0.0MB';
     if (os) {
-      memStat.textContent = os.memory.toFixed(1) + 'MB';
+      memStat.textContent = os.memory.toFixed(0) + 'MB';
       memChart.data.datasets[0].data.push(os.memory);
       memChart.data.labels.push(os.timestamp);
     }
@@ -286,7 +297,7 @@ socket.on('esm_stats', function (data) {
 
     heapStat.textContent = '0';
     if (os) {
-      heapStat.textContent = (os.heap.used_heap_size / 1024 / 1024).toFixed(1) + 'MB';
+      heapStat.textContent = (os.heap.used_heap_size / 1024 / 1024).toFixed(0) + 'MB';
       heapChart.data.datasets[0].data.push(os.heap.used_heap_size / 1024 / 1024);
       heapChart.data.labels.push(os.timestamp);
     }
@@ -298,9 +309,9 @@ socket.on('esm_stats', function (data) {
       eventLoopChart.data.labels.push(os.timestamp);
     }
 
-    responseTimeStat.textContent = '0.00ms';
+    responseTimeStat.textContent = '0ms';
     if (responses) {
-      responseTimeStat.textContent = responses.mean.toFixed(2) + 'ms';
+      responseTimeStat.textContent = responses.mean.toFixed(0) + 'ms';
       responseTimeChart.data.datasets[0].data.push(responses.mean);
       responseTimeChart.data.labels.push(responses.timestamp);
     }
@@ -309,7 +320,7 @@ socket.on('esm_stats', function (data) {
       var deltaTime = responses.timestamp - rpsChart.data.labels[rpsChart.data.labels.length - 1];
 
       if (deltaTime < 1) deltaTime = 1000;
-      rpsStat.textContent = ((responses.count / deltaTime) * 1000).toFixed(2);
+      rpsStat.textContent = ((responses.count / deltaTime) * 1000).toFixed(1);
       rpsChart.data.datasets[0].data.push((responses.count / deltaTime) * 1000);
       rpsChart.data.labels.push(responses.timestamp);
     }
