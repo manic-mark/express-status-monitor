@@ -82,6 +82,7 @@ var rpsDataset = [Object.create(defaultDataset)];
 var cpuStat = document.getElementById('cpuStat');
 var memStat = document.getElementById('memStat');
 var loadStat = document.getElementById('loadStat');
+var loadStatAvg = document.getElementById('loadStatAvg');
 var heapStat = document.getElementById('heapStat');
 var eventLoopStat = document.getElementById('eventLoopStat');
 var responseTimeStat = document.getElementById('responseTimeStat');
@@ -174,8 +175,15 @@ socket.on('esm_start', function (data) {
   memChart.data.labels = data[defaultSpan].os.map(addTimestamp);
 
   loadStat.textContent = '0.00';
+  // eslint-disable-next-line no-nested-ternary
+  const loadAverageToUse = data[defaultSpan].interval <= 30
+    ? 0
+    : data[defaultSpan].interval <= 150
+      ? 1 : 2
+
+  loadStatAvg.textContent = ['One Minute Load Avg', 'Five Minute Load Avg', 'Fifteen Minute Load Avg'][loadAverageToUse];
   if (lastOsMetric) {
-    loadStat.textContent = lastOsMetric.load[defaultSpan].toFixed(2);
+    loadStat.textContent = lastOsMetric.load[loadAverageToUse].toFixed(2);
   }
 
   loadChart.data.datasets[0].data = data[defaultSpan].os.map(function (point) {
