@@ -49,7 +49,8 @@ var defaultOptions = {
     ],
   },
   tooltips: {
-    enabled: false,
+    enabled: true,
+    filter: a => a,
   },
   responsive: true,
   maintainAspectRatio: false,
@@ -164,9 +165,9 @@ socket.on('esm_start', function (data) {
   });
   cpuChart.data.labels = data[defaultSpan].os.map(addTimestamp);
 
-  memStat.textContent = '0.0MB';
+  memStat.textContent = '0MB';
   if (lastOsMetric) {
-    memStat.textContent = lastOsMetric.memory.toFixed(1) + 'MB';
+    memStat.textContent = lastOsMetric.memory.toFixed(0) + 'MB';
   }
 
   memChart.data.datasets[0].data = data[defaultSpan].os.map(function (point) {
@@ -187,7 +188,7 @@ socket.on('esm_start', function (data) {
   }
 
   loadChart.data.datasets[0].data = data[defaultSpan].os.map(function (point) {
-    return point.load[0];
+    return point.load[loadAverageToUse];
   });
   loadChart.data.labels = data[defaultSpan].os.map(addTimestamp);
 
@@ -206,9 +207,9 @@ socket.on('esm_start', function (data) {
 
   var lastResponseMetric = data[defaultSpan].responses[data[defaultSpan].responses.length - 1];
 
-  responseTimeStat.textContent = '0.00ms';
+  responseTimeStat.textContent = '0ms';
   if (lastResponseMetric) {
-    responseTimeStat.textContent = lastResponseMetric.mean.toFixed(2) + 'ms';
+    responseTimeStat.textContent = lastResponseMetric.mean.toFixed(0) + 'ms';
   }
 
   responseTimeChart.data.datasets[0].data = data[defaultSpan].responses.map(function (point) {
@@ -289,7 +290,7 @@ socket.on('esm_stats', function (data) {
       cpuChart.data.labels.push(os.timestamp);
     }
 
-    memStat.textContent = '0.0MB';
+    memStat.textContent = '0MB';
     if (os) {
       memStat.textContent = os.memory.toFixed(0) + 'MB';
       memChart.data.datasets[0].data.push(os.memory);
@@ -298,12 +299,18 @@ socket.on('esm_stats', function (data) {
 
     loadStat.textContent = '0';
     if (os) {
-      loadStat.textContent = os.load[0].toFixed(2);
-      loadChart.data.datasets[0].data.push(os.load[0]);
+      // eslint-disable-next-line no-nested-ternary
+      const loadAverageToUse = data.interval <= 30
+        ? 0
+        : data.interval <= 150
+          ? 1 : 2
+
+      loadStat.textContent = os.load[loadAverageToUse].toFixed(2);
+      loadChart.data.datasets[0].data.push(os.load[loadAverageToUse]);
       loadChart.data.labels.push(os.timestamp);
     }
 
-    heapStat.textContent = '0';
+    heapStat.textContent = '0MB';
     if (os) {
       heapStat.textContent = (os.heap.used_heap_size / 1024 / 1024).toFixed(0) + 'MB';
       heapChart.data.datasets[0].data.push(os.heap.used_heap_size / 1024 / 1024);
