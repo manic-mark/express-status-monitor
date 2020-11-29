@@ -12,6 +12,16 @@ Chart.defaults.global.legend.display = false;
 Chart.defaults.global.elements.line.backgroundColor = 'rgba(0,0,0,0)';
 Chart.defaults.global.elements.line.borderColor = 'rgba(0,0,0,0.9)';
 Chart.defaults.global.elements.line.borderWidth = 2;
+Chart.defaults.global.elements.line.tension = 0;
+Chart.defaults.global.elements.point.radius = 4;
+Chart.defaults.global.elements.point.hitRadius = 5;
+Chart.defaults.global.elements.point.hoverBorderWidth = 2;
+Chart.Tooltip.positioners.custom = function (elements, eventPosition) {
+  return {
+    x: eventPosition.x,
+    y: 2
+  };
+};
 
 var socket = io(location.protocol + '//' + location.hostname + ':' + (port || location.port), {
   path: socketPath,
@@ -20,12 +30,13 @@ var defaultSpan = 0;
 var spans = [];
 var statusCodesColors = ['#75D701', '#47b8e0', '#ffc952', '#E53A40'];
 
-var defaultDataset = {
-  label: '',
-  data: [],
-  lineTension: 0.2,
-  pointRadius: 0,
-};
+function defaultDataset (label) {
+  return {
+    label,
+    data: [],
+    barThickness: 'flex',
+  }
+}
 
 var defaultOptions = {
   scales: {
@@ -49,8 +60,14 @@ var defaultOptions = {
     ],
   },
   tooltips: {
+    mode: 'index',
+    intersect: false,
     enabled: true,
     filter: a => a,
+    titleFontSize: 13,
+    bodyFontSize: 13,
+    position: 'custom',
+    caretSize: 0,
   },
   responsive: true,
   maintainAspectRatio: false,
@@ -61,7 +78,6 @@ var createChart = function (ctx, dataset) {
   return new Chart(ctx, {
     type: 'line',
     data: {
-      labels: [],
       datasets: dataset,
     },
     options: defaultOptions,
@@ -72,13 +88,13 @@ var addTimestamp = function (point) {
   return point.timestamp;
 };
 
-var cpuDataset = [Object.create(defaultDataset)];
-var memDataset = [Object.create(defaultDataset)];
-var loadDataset = [Object.create(defaultDataset)];
-var heapDataset = [Object.create(defaultDataset)];
-var eventLoopDataset = [Object.create(defaultDataset)];
-var responseTimeDataset = [Object.create(defaultDataset)];
-var rpsDataset = [Object.create(defaultDataset)];
+var cpuDataset = [Object.create(defaultDataset('cpu'))];
+var memDataset = [Object.create(defaultDataset('memory'))];
+var loadDataset = [Object.create(defaultDataset('system load'))];
+var heapDataset = [Object.create(defaultDataset('js heap'))];
+var eventLoopDataset = [Object.create(defaultDataset('js event loop'))];
+var responseTimeDataset = [Object.create(defaultDataset('response time'))];
+var rpsDataset = [Object.create(defaultDataset('request rate'))];
 
 var cpuStat = document.getElementById('cpuStat');
 var memStat = document.getElementById('memStat');
@@ -108,12 +124,11 @@ var rpsChart = createChart(rpsChartCtx, rpsDataset);
 var statusCodesChart = new Chart(statusCodesChartCtx, {
   type: 'line',
   data: {
-    labels: [],
     datasets: [
-      Object.create(defaultDataset),
-      Object.create(defaultDataset),
-      Object.create(defaultDataset),
-      Object.create(defaultDataset),
+      Object.create(defaultDataset('2xx')),
+      Object.create(defaultDataset('3xx')),
+      Object.create(defaultDataset('4xx')),
+      Object.create(defaultDataset('5xx')),
     ],
   },
   options: defaultOptions,
