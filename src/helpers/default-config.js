@@ -32,6 +32,6 @@ module.exports = {
   },
   ignoreStartsWith: '/admin',
   healthChecks: [],
-  chartjsSrc: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.bundle.min.js',
-  socketIoSrc: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js',
+  chartjsSrc: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js',
+  socketIoSrc: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js',
 };
